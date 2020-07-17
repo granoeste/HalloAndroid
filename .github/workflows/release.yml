@@ -28,7 +28,8 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
-          body: |
-            ${{ steps.changelog.outputs.changelog }}
+#          body: |
+#            ${{ steps.changelog.outputs.changelog }}
+          body_path: ${{ steps.changelog.outputs.changelog }}
           draft: false
           prerelease: false
