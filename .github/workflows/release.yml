@@ -7,7 +7,7 @@ on:
 name: Create Release
 
 jobs:
-  build:
+  createrelease:
     name: Create Release
     runs-on: ubuntu-latest
     steps:
@@ -27,6 +27,7 @@ jobs:
           github-token: ${{ secrets.github_token }}
           git-user-name: 'granoeste'
           git-user-email: 'granoeste@gmail.com'
+          git-pull-method: ''
           output-file: 'false'
           skip-on-empty: 'true'
       - name: Create Release
