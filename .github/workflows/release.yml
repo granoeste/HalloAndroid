@@ -15,20 +15,42 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-#      - name: changelog
-#        id: changelog
-#        uses: heinrichreimer/github-changelog-generator-action@v2.1.1
-#        with:
-#          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Conventional Changelog Action
-        id: changelog
-        uses: TriPSs/conventional-changelog-action@v3
+      - name: Set Environment
+        run: |
+          echo ::set-env name=REPOSITORY_USER::$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $1}')
+          echo ::set-env name=REPOSITORY_NAME::$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}')
+        shell: bash
+      - name: Get Previous Tag
+        run: |
+          CMD_PREVIOUS_TAG=$(git describe --abbrev=0 --tags `git rev-list --tags --skip=1 --max-count=1`)
+          echo ${CMD_PREVIOUS_TAG}
+          echo ::set-env name=PREVIOUS_TAG::${CMD_PREVIOUS_TAG}
+        shell: bash
+      - name: Environment
+        run: |
+          echo "REPOSITORY_USER->${REPOSITORY_USER}"
+          echo "REPOSITORY_NAME->${REPOSITORY_NAME}"
+          echo "PREVIOUS_TAG->${PREVIOUS_TAG}"
+        shell: bash
+      - name: Set up Ruby 2.6
+        uses: actions/setup-ruby@v1
         with:
-          github-token: ${{ secrets.github_token }}
-          git-user-name: 'granoeste'
-          git-user-email: 'granoeste@gmail.com'
-          output-file: 'false'
-          skip-on-empty: 'true'
+          ruby-version: '2.6'
+      - name: Cache bundle directory
+        uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
+      - name: Prepare bundler
+        run: |
+          gem install bundler
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
+      - name: Generate CHANGELOG
+        run: |
+          bundle exec github_changelog_generator -u $REPOSITORY_USER -p $REPOSITORY_NAME --since-tag $PREVIOUS_TAG --token ${{ secrets.GITHUB_TOKEN }}
+          ls -la  ${GITHUB_WORKSPACE}
+          cat ${GITHUB_WORKSPACE}/CHANGELOG.md
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
@@ -36,12 +58,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-#          tag_name: ${{ github.ref }}
-#          release_name: Release ${{ github.ref }}
-#          body: |
-#            ${{ steps.changelog.outputs.changelog }}
-          tag_name: ${{ steps.changelog.outputs.tag }}
-          release_name: ${{ steps.changelog.outputs.tag }}
-          body: ${{ steps.changelog.outputs.clean_changelog }}
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body_path: ${GITHUB_WORKSPACE}/CHANGELOG.md
           draft: false
           prerelease: false
