@@ -47,6 +47,7 @@ jobs:
           bundle config path vendor/bundle
           bundle install --jobs 4 --retry 3
       - name: Generate CHANGELOG
+        id: generate_changelog
         run: |
           bundle exec github_changelog_generator -u $REPOSITORY_USER -p $REPOSITORY_NAME --since-tag $PREVIOUS_TAG --token ${{ secrets.GITHUB_TOKEN }}
           ls -la  ${GITHUB_WORKSPACE}
@@ -54,9 +55,8 @@ jobs:
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
-        if: ${{ steps.changelog.outputs.skipped == 'false' }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
