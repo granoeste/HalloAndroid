@@ -51,19 +51,15 @@ jobs:
         run: |
           bundle exec github_changelog_generator -u $REPOSITORY_USER -p $REPOSITORY_NAME --since-tag $PREVIOUS_TAG --token ${{ secrets.GITHUB_TOKEN }}
           echo ::set-output name=changelog::$(echo `cat ${GITHUB_WORKSPACE}/CHANGELOG.md`)
-      - name: CHANGELOG
-        run: |
-          echo "${{ steps.generate_changelog.outputs.changelog }}"
-        shell: bash
-
-#      - name: Create Release
-#        id: create_release
-#        uses: actions/create-release@latest
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          tag_name: ${{ github.ref }}
-#          release_name: Release ${{ github.ref }}
-#          body_path: ${GITHUB_WORKSPACE}/CHANGELOG.md
-#          draft: false
-#          prerelease: false
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            ${{ steps.generate_changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
