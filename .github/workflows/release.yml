@@ -27,7 +27,7 @@ jobs:
           github-token: ${{ secrets.github_token }}
           git-user-name: 'granoeste'
           git-user-email: 'granoeste@gmail.com'
-          git-pull-method: ''
+          git-pull-method: '--ff'
           output-file: 'false'
           skip-on-empty: 'true'
       - name: Create Release
