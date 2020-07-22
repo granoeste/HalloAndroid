@@ -54,9 +54,8 @@ jobs:
       - name: Environment
         run: |
           ls -l "${GITHUB_WORKSPACE}"
-          find . -name CHANGELOG.md
-          find . -name CHANGELOG.md -type f -print
-          locate ${GITHUB_WORKSPACE}/CHANGELOG.md
+          find . -maxdepth 1 -type f -name CHANGELOG.md
+          cat "${GITHUB_WORKSPACE}/CHANGELOG.md"
         shell: bash
       - name: Create Release
         id: create_release
