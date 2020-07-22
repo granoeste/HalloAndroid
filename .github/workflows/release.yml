@@ -50,13 +50,19 @@ jobs:
         id: generate_changelog
         run: |
           bundle exec github_changelog_generator -u $REPOSITORY_USER -p $REPOSITORY_NAME --since-tag $PREVIOUS_TAG --token ${{ secrets.GITHUB_TOKEN }}
-      - name: Set Environment
-        run: |
+
           ls -l "${GITHUB_WORKSPACE}"
           find `pwd` -maxdepth 1 -type f -name CHANGELOG.md
           cat "${GITHUB_WORKSPACE}/CHANGELOG.md"
           readlink -f ${GITHUB_WORKSPACE}/CHANGELOG.md
-          echo ::set-env name=CHANGELOG_PATH::$(echo `readlink -f ${GITHUB_WORKSPACE}/CHANGELOG.md`)
+
+          # If CHANGELOG.md exits, copy it to an env var
+          if [[ -e 'CHANGELOG.md' ]]; then
+            export CHANGELOG="$(cat CHANGELOG.md | sed ':a;N;$!ba;s/%/%25/g' | sed ':a;N;$!ba;s/\n/%0A/g' | sed ':a;N;$!ba;s/\r/%0D/g')"
+          fi
+
+          echo "$CHANGELOG"
+          echo ::set-output name=changelog::"${CHANGELOG}"
         shell: bash
       - name: Create Release
         id: create_release
@@ -65,10 +71,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-#          body: |
-#            ${{ steps.generate_changelog.outputs.changelog }}
+          release_name: ${{ github.ref }}
+          body: |
+            ${{ steps.generate_changelog.outputs.changelog }}
 #          body_path: ${GITHUB_WORKSPACE}/CHANGELOG.md
-          body_path: $CHANGELOG_PATH
+#          body_path: $CHANGELOG_PATH
           draft: false
           prerelease: false
