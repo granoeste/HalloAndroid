@@ -59,30 +59,36 @@ jobs:
           echo "REPOSITORY_NAME->${REPOSITORY_NAME}"
           echo "PREVIOUS_TAG->${PREVIOUS_TAG}"
         shell: bash
-      - name: Set up Ruby 2.6
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: '2.6'
-      - name: Cache Bundle Directory
-        uses: actions/cache@v2
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
-      - name: Prepare Bundler
-        run: |
-          gem install bundler
-          bundle config path vendor/bundle
-          bundle install --jobs 4 --retry 3
+#      - name: Set up Ruby 2.6
+#        uses: actions/setup-ruby@v1
+#        with:
+#          ruby-version: '2.6'
+#      - name: Cache Bundle Directory
+#        uses: actions/cache@v2
+#        with:
+#          path: vendor/bundle
+#          key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
+#      - name: Prepare Bundler
+#        run: |
+#          gem install bundler
+#          bundle config path vendor/bundle
+#          bundle install --jobs 4 --retry 3
+#      - name: Generate Changelog
+#        id: generate_changelog
+#        run: |
+#          bundle exec github_changelog_generator -u $REPOSITORY_USER -p $REPOSITORY_NAME --since-tag $PREVIOUS_TAG --token ${{ secrets.GITHUB_TOKEN }}
+#          if [[ -e 'CHANGELOG.md' ]]; then
+#            export CHANGELOG="$(cat CHANGELOG.md | sed ':a;N;$!ba;s/%/%25/g' | sed ':a;N;$!ba;s/\n/%0A/g' | sed ':a;N;$!ba;s/\r/%0D/g')"
+#          fi
+#          echo "$CHANGELOG"
+#          echo ::set-output name=changelog::"${CHANGELOG}"
+#        shell: bash
       - name: Generate Changelog
         id: generate_changelog
-        run: |
-          bundle exec github_changelog_generator -u $REPOSITORY_USER -p $REPOSITORY_NAME --since-tag $PREVIOUS_TAG --token ${{ secrets.GITHUB_TOKEN }}
-          if [[ -e 'CHANGELOG.md' ]]; then
-            export CHANGELOG="$(cat CHANGELOG.md | sed ':a;N;$!ba;s/%/%25/g' | sed ':a;N;$!ba;s/\n/%0A/g' | sed ':a;N;$!ba;s/\r/%0D/g')"
-          fi
-          echo "$CHANGELOG"
-          echo ::set-output name=changelog::"${CHANGELOG}"
-        shell: bash
+        uses: heinrichreimer/action-github-changelog-generator@v2.1.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          sinceTag: $PREVIOUS_TAG
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest

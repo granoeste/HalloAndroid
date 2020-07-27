@@ -52,6 +52,3 @@ jobs:
             - Auto generated with PR:${{ github.event.pull_request.number }}
           reviewers: |
             granoeste
-      - name: Check outputs
-        run: |
-          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
