@@ -55,15 +55,31 @@ jobs:
         run: |
           echo ${{ steps.action-github-changelog-generato.outputs.changelog }}
           ls -la
+          cat CHANGELOG.md
         shell: bash
+#      - name: Commit files
+#        env:
+#          AUTHOR_NAME: 'Add & Commit Action'
+#          AUTHOR_EMAIL: 'actions@github.com'
+#        run: |
+#          git config --local user.email "$AUTHOR_EMAIL"
+#          git config --local user.name "$AUTHOR_NAME"
+#
+#          git add CHANGELOG.md
+#          git commit -m "Update Changelog" --author="$AUTHOR_NAME <$I$AUTHOR_EMAIL>"
+#
+#          git add CHANGELOG.md && git commit -m 'Updated CHANGELOG.md' && echo ::set-env name=push
+#
+#          git push --set-upstream origin
       - name: Add & Commit
         uses: EndBug/add-and-commit@v4.2.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          ref: 'changelog'
           message: 'Update Changelog'
           add: ./CHANGELOG.md
-      - name: pr-changelog
-        uses: Guzzler/file-changelog-issue-action@1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      - name: pr-changelog
+#        uses: Guzzler/file-changelog-issue-action@1.0.1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
