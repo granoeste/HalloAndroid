@@ -19,31 +19,42 @@ jobs:
           echo ::set-env name=REPOSITORY_USER::$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $1}')
           echo ::set-env name=REPOSITORY_NAME::$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}')
         shell: bash
-      - name: Set up Ruby 2.6
-        uses: actions/setup-ruby@v1
+
+#      - name: Set up Ruby 2.6
+#        uses: actions/setup-ruby@v1
+#        with:
+#          ruby-version: '2.6'
+#      - name: Cache Bundle Directory
+#        uses: actions/cache@v2
+#        with:
+#          path: vendor/bundle
+#          key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
+#      - name: Prepare Bundler
+#        run: |
+#          gem install bundler
+#          bundle config path vendor/bundle
+#          bundle install --jobs 4 --retry 3
+#      - name: Generate Changelog
+#        id: generate_changelog
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        run: |
+#          bundle exec github_changelog_generator -u $REPOSITORY_USER -p $REPOSITORY_NAME --token $GITHUB_TOKEN
+#          if [[ -e 'CHANGELOG.md' ]]; then
+#            export CHANGELOG="$(cat CHANGELOG.md | sed ':a;N;$!ba;s/%/%25/g' | sed ':a;N;$!ba;s/\n/%0A/g' | sed ':a;N;$!ba;s/\r/%0D/g')"
+#          fi
+#          echo "$CHANGELOG"
+#          echo ::set-output name=changelog::"${CHANGELOG}"
+#        shell: bash
+      - name: Action Generate Changelog
+        id: action-github-changelog-generato
+        uses: heinrichreimer/action-github-changelog-generator@v2.1.1
         with:
-          ruby-version: '2.6'
-      - name: Cache Bundle Directory
-        uses: actions/cache@v2
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
-      - name: Prepare Bundler
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Display Changelog
         run: |
-          gem install bundler
-          bundle config path vendor/bundle
-          bundle install --jobs 4 --retry 3
-      - name: Generate Changelog
-        id: generate_changelog
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          bundle exec github_changelog_generator -u $REPOSITORY_USER -p $REPOSITORY_NAME --token $GITHUB_TOKEN
-          if [[ -e 'CHANGELOG.md' ]]; then
-            export CHANGELOG="$(cat CHANGELOG.md | sed ':a;N;$!ba;s/%/%25/g' | sed ':a;N;$!ba;s/\n/%0A/g' | sed ':a;N;$!ba;s/\r/%0D/g')"
-          fi
-          echo "$CHANGELOG"
-          echo ::set-output name=changelog::"${CHANGELOG}"
+          echo ${{ steps.action-github-changelog-generato.outputs.changelog }}
+          ls -la
         shell: bash
       - name: Add & Commit
         uses: EndBug/add-and-commit@v4.2.1
