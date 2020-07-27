@@ -7,48 +7,48 @@ on:
       - master
 
 jobs:
-  update_changelog:
+  generate:
+    name: Generate Changelog
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Set Environment
-        run: |
-          echo ::set-env name=REPOSITORY_USER::$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $1}')
-          echo ::set-env name=REPOSITORY_NAME::$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}')
-        shell: bash
-      - name: Set up Ruby 2.6
-        uses: actions/setup-ruby@v1
+      - name: Action Generate Changelog
+        uses: heinrichreimer/action-github-changelog-generator@v2.1.1
         with:
-          ruby-version: '2.6'
-      - name: Cache Bundle Directory
-        uses: actions/cache@v2
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Changelog
+        uses: actions/upload-artifact@v2
         with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
-      - name: Prepare Bundler
-        run: |
-          gem install bundler
-          bundle config path vendor/bundle
-          bundle install --jobs 4 --retry 3
-      - name: Generate Changelog
-        id: generate_changelog
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          bundle exec github_changelog_generator -u $REPOSITORY_USER -p $REPOSITORY_NAME --token $GITHUB_TOKEN
-          if [[ -e 'CHANGELOG.md' ]]; then
-            export CHANGELOG="$(cat CHANGELOG.md | sed ':a;N;$!ba;s/%/%25/g' | sed ':a;N;$!ba;s/\n/%0A/g' | sed ':a;N;$!ba;s/\r/%0D/g')"
-          fi
-          echo "$CHANGELOG"
-          echo ::set-output name=changelog::"${CHANGELOG}"
-        shell: bash
-      - name: Add & Commit
-        uses: EndBug/add-and-commit@v4.2.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: changelog
+          path: CHANGELOG.md
+
+  create-pull-request:
+    name: Create Pull Request
+    runs-on: ubuntu-latest
+    needs: generate
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
         with:
-          message: 'Update Changelog'
-          add: ./CHANGELOG.md
+          ref: master
+          fetch-depth: 0
+      - name: Download Changelog
+        uses: actions/download-artifact@v2
+        with:
+          name: changelog
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v3.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          branch: changelog
+          title: 'Update Changelog'
+          body: |
+            Update Changelog
+            - Auto generated with PR:#${{ github.event.pull_request.number }}
+          reviewers: |
+            granoeste
