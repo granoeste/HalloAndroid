@@ -72,9 +72,13 @@ def verifySignature(String path) {
 //    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
 //        commandExe = getBuildToolsPath() + "/apksigner.bat"
 //    } else {
-    commandExe = getBuildToolsPath() + "/apksigner"
+//    commandExe = getBuildToolsPath() + "/apksigner"
 //    }
-    println "verifySignature:${commandExe},${path}"
+
+    println "ANDROID_HOME:${System.env.ANDROID_HOME}"
+
+    // 最新の 30.0.0 は Version 53(Java 9) が必要なため 29.0.2 を指定。
+    commandExe = "${System.env.ANDROID_HOME}/build-tools/29.0.2/apksigner"
 
     return "${commandExe} verify --print-certs ${path}".execute().text
 }
