@@ -48,10 +48,12 @@ jobs:
           echo ::set-env name=REPOSITORY_NAME::$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}')
         shell: bash
       - name: Get Previous Tag
+        id: previous_tag
         run: |
           CMD_PREVIOUS_TAG=$(git describe --abbrev=0 --tags `git rev-list --tags --skip=1 --max-count=1`)
           echo ${CMD_PREVIOUS_TAG}
           echo ::set-env name=PREVIOUS_TAG::${CMD_PREVIOUS_TAG}
+          echo ::set-output name=tag::"${CMD_PREVIOUS_TAG}"
         shell: bash
       - name: Display Environment
         run: |
@@ -87,7 +89,7 @@ jobs:
         uses: heinrichreimer/action-github-changelog-generator@v2.1.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          sinceTag: ${{ PREVIOUS_TAG }}
+          sinceTag: ${{ steps.previous_tag.outputs.tag }}
       - name: Generate Changelog
         id: generate_changelog
         run: |
