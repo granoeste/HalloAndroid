@@ -55,10 +55,11 @@ jobs:
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           branch: changelog
           title: 'Update Changelog'
-        body: |
-          Update Changelog
-          - Auto generated with PR:${{ github.ref }} [${{ github.sha }}]
-        reviewers: granoeste
+          body: |
+            Update Changelog
+            - Auto generated with PR:${{ github.ref }} [${{ github.sha }}]
+          reviewers: |
+            granoeste
       - name: Check outputs
         run: |
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
