@@ -57,7 +57,7 @@ jobs:
           title: 'Update Changelog'
           body: |
             Update Changelog
-            - Auto generated with PR:${{ github.ref }} [${{ github.sha }}]
+            - Auto generated with PR:${{ github.event.pull_request.number }}
           reviewers: |
             granoeste
       - name: Check outputs
