@@ -53,6 +53,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Display Changelog
         run: |
+          echo "GITHUB_REF->$GITHUB_REF"
           echo ${{ steps.action-github-changelog-generato.outputs.changelog }}
           ls -la
           cat CHANGELOG.md
