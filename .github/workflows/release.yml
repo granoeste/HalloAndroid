@@ -4,11 +4,11 @@ on:
     tags:
       - '*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
-name: Create Release and Deploy
+name: Build and Create Release and Deploy
 
 jobs:
-  deploy:
-    name: Deploy Release
+  build:
+    name: Build Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -31,11 +31,6 @@ jobs:
         with:
           name: outputs
           path: app/build/outputs
-      - name: Upload Release APK
-        uses: actions/upload-artifact@v2
-        with:
-          name: release
-          path: app/build/outputs/apk/release/*.apk
 
   release:
     name: Create Release
@@ -99,13 +94,18 @@ jobs:
             ${{ steps.generate_changelog.outputs.changelog }}
           draft: false
           prerelease: false
-      - name: Download outputs
+      - name: Download Outputs
         id: download_outputs
         uses: actions/download-artifact@v2
         with:
           name: outputs
+          path: outputs
       - name: Display structure of downloaded files
-        run: ls -R
+        run: ls -R ./outputs
+      - name: Archive Outputs
+        uses: montudor/action-zip@v0.1.0
+        with:
+          args: zip -qq -r ./outputs.zip ./outputs
       - name: Upload Release Asset
         id: upload_release_asset
         uses: actions/upload-release-asset@v1
@@ -116,3 +116,17 @@ jobs:
           asset_path: ./outputs.zip
           asset_name: outputs.zip
           asset_content_type: application/zip
+
+  deploy:
+    name: Deploy Release
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Download outputs
+        id: download_outputs
+        uses: actions/download-artifact@v2
+        with:
+          name: outputs
+          path: outputs
+      - name: Display structure of downloaded files
+        run: ls -R outputs
