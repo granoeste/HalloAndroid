@@ -84,11 +84,19 @@ jobs:
 #          echo ::set-output name=changelog::"${CHANGELOG}"
 #        shell: bash
       - name: Generate Changelog
-        id: generate_changelog
         uses: heinrichreimer/action-github-changelog-generator@v2.1.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           sinceTag: $PREVIOUS_TAG
+      - name: Generate Changelog
+        id: generate_changelog
+        run: |
+          if [[ -e 'CHANGELOG.md' ]]; then
+            export CHANGELOG="$(cat CHANGELOG.md | sed ':a;N;$!ba;s/%/%25/g' | sed ':a;N;$!ba;s/\n/%0A/g' | sed ':a;N;$!ba;s/\r/%0D/g')"
+          fi
+          echo "$CHANGELOG"
+          echo ::set-output name=changelog::"${CHANGELOG}"
+        shell: bash
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
