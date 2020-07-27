@@ -58,8 +58,7 @@ jobs:
         body: |
           Update Changelog
           - Auto generated with PR:${{ github.ref }} [${{ github.sha }}]
-        reviewers: |
-          granoeste
+        reviewers: granoeste
       - name: Check outputs
         run: |
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
