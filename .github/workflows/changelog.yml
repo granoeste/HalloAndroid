@@ -39,14 +39,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: changelog
-#      - name: Add & Commit CHANGELOG.md
-#        uses: EndBug/add-and-commit@v4.2.1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          ref: 'changelog'
-#          message: 'Update Changelog'
-#          add: ./CHANGELOG.md
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v3.0.0
