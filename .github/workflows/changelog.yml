@@ -63,3 +63,7 @@ jobs:
         with:
           message: 'Update Changelog'
           add: ./CHANGELOG.md
+      - name: pr-changelog
+        uses: Guzzler/file-changelog-issue-action@1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
