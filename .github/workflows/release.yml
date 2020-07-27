@@ -11,7 +11,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -20,7 +20,7 @@ jobs:
           echo ::set-env name=REPOSITORY_USER::$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $1}')
           echo ::set-env name=REPOSITORY_NAME::$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}')
         shell: bash
-      - name: set up JDK 1.8
+      - name: Set Up JDK 1.8
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
@@ -28,7 +28,7 @@ jobs:
         run: ./gradlew assemble
       - name: Verify APK
         run: ./gradlew verifyApk
-      - name: Upload outputs
+      - name: Upload Outputs
         uses: actions/upload-artifact@v2
         with:
           name: outputs
@@ -39,7 +39,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -47,6 +47,12 @@ jobs:
         run: |
           echo ::set-env name=REPOSITORY_USER::$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $1}')
           echo ::set-env name=REPOSITORY_NAME::$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}')
+
+          echo "$BUILD_TOOLS_VERSION"
+          echo "$ANDROID_HOME"
+
+          echo ::set-env name=BUILD_TOOLS_VERSION::$(echo "$BUILD_TOOLS_VERSION" | '29.0.2')
+          echo ::set-env name=ANDROID_HOME::$(echo "$ANDROID_HOME" | '29.0.2')
         shell: bash
       - name: Get Previous Tag
         run: |
@@ -54,7 +60,7 @@ jobs:
           echo ${CMD_PREVIOUS_TAG}
           echo ::set-env name=PREVIOUS_TAG::${CMD_PREVIOUS_TAG}
         shell: bash
-      - name: Environment
+      - name: Display Environment
         run: |
           echo "REPOSITORY_USER->${REPOSITORY_USER}"
           echo "REPOSITORY_NAME->${REPOSITORY_NAME}"
